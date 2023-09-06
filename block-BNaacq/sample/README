@@ -1,0 +1,99 @@
+<!-- An example to demonstrate how we connect different Schemas in a Mongoose-MongoDB application:- -->
+
+Suppose you have the following data in your MongoDB collections:
+
+1. Users Collection:
+
+```json
+[
+  {
+    "_id": "user1",
+    "name": "Alice",
+    "email": "alice@example.com",
+    "age": 25
+  },
+  {
+    "_id": "user2",
+    "name": "Bob",
+    "email": "bob@example.com",
+    "age": 30
+  }
+]
+```
+
+2. Articles Collection:
+
+```json
+[
+  {
+    "_id": "article1",
+    "title": "Introduction to Mongoose",
+    "author": "user1"
+  },
+  {
+    "_id": "article2",
+    "title": "MongoDB Queries",
+    "author": "user2"
+  }
+]
+```
+
+3. Comments Collection:
+
+```json
+[
+  {
+    "_id": "comment1",
+    "content": "Great article!",
+    "author": "user1",
+    "article": "article1"
+  },
+  {
+    "_id": "comment2",
+    "content": "I learned a lot from this!",
+    "author": "user2",
+    "article": "article1"
+  }
+]
+```
+
+Now, let's say you want to retrieve information about "article1" and populate the "author" field to get the full user information of the article's author.
+
+You can do this using Mongoose as follows:
+
+```javascript
+const mongoose = require('mongoose');
+
+// Define the User, Article, and Comment models (assuming you've already defined them)
+const User = mongoose.model('User', userSchema);
+const Article = mongoose.model('Article', articleSchema);
+const Comment = mongoose.model('Comment', commentSchema);
+
+// Find the article with _id "article1" and populate the "author" field
+Article.findOne({ _id: 'article1' })
+  .populate('author') // Populate the "author" field with the corresponding user document
+  .exec((err, article) => {
+    if (err) {
+      console.error(err);
+    } else {
+      // The "article" variable now contains the article document with the "author" field populated
+      console.log(article.title); // "Introduction to Mongoose"
+      console.log(article.author.name); // "Alice" (Full user information)
+    }
+
+    // Close the MongoDB connection
+    mongoose.connection.close();
+  });
+```
+
+In this example:
+
+- We first define the User, Article, and Comment models with their respective schemas.
+
+- We use `Article.findOne({ _id: "article1" })` to find the article with the `_id` "article1".
+
+- We then use `.populate('author')` to populate the "author" field in the article document with the corresponding user document. Mongoose automatically fetches the user document from the Users collection whose `_id` matches the value in the "author" field.
+
+- After executing the query, the `article` variable contains the article document with the "author" field populated. You can now access the full user information, including the name, email, and age of the article's author.
+
+This is how Mongoose allows you to easily access related data across different collections by populating fields based on references, providing a convenient way to work with relationships between documents.
